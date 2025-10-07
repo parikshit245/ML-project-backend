@@ -10,6 +10,7 @@ CORS(app)
 # Load model and columns
 model = joblib.load("random_forest_model.pkl")
 columns = joblib.load("input_columns.pkl")  # saved from training
+selector = joblib.load("selector.pkl")
 
 @app.route("/")
 def home():
@@ -19,8 +20,9 @@ def home():
 def predict():
     try:
         data = request.get_json()
-        df = pd.DataFrame([data], columns=columns)
-        prediction = model.predict(df)[0]
+        df = pd.DataFrame([data])  # all 8 columns
+        X_selected = selector.transform(df)
+        prediction = model.predict(X_selected)[0]
         return jsonify({"prediction": str(prediction)})
     except Exception as e:
         return jsonify({"error": str(e)})
